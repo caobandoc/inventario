@@ -1,4 +1,4 @@
-package com.caoc.inventory.inventory;
+package com.caoc.inventory;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
