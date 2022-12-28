@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,9 +27,12 @@ public class CategoryRestController {
     public Mono<ResponseEntity<CategoryResponseRest>> searchCategoriesById(@PathVariable String id) {
         return categoryService.searchById(id);
     }
-
     @PostMapping
     public Mono<ResponseEntity<CategoryResponseRest>> saveCategory(@RequestBody Category category) {
         return categoryService.save(category);
+    }
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<CategoryResponseRest>> saveCategory(@RequestBody Category category, @PathVariable String id) {
+        return categoryService.update(category, id);
     }
 }

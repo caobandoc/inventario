@@ -73,6 +73,32 @@ public class CategoryServiceImpl implements ICategoryService {
                 });
     }
 
+    @Override
+    @Transactional
+    public Mono<ResponseEntity<CategoryResponseRest>> update(Category category, String id) {
+        return categoryDao.findById(id)
+                .flatMap(categoryFound -> {
+                    categoryFound.setName(category.getName());
+                    categoryFound.setDescription(category.getDescription());
+                    return categoryDao.save(categoryFound);
+                })
+
+                .flatMap(categoryUpdated -> {
+                    CategoryResponseRest response = responseSuccess(Arrays.asList(categoryUpdated), "Categoria actualizada");
+                    return Mono.just(ResponseEntity.ok(response));
+                })
+
+                .switchIfEmpty(
+                        Mono.just(new ResponseEntity<>(responseError("Categoria no encontrada"), HttpStatus.NOT_FOUND))
+                )
+
+                .onErrorResume(error -> {
+                    CategoryResponseRest response = responseError("Error al actualizar la categoria");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
     private CategoryResponseRest responseSuccess(List<Category> categoryList, String msg) {
         CategoryResponseRest response = new CategoryResponseRest();
         response.getCategoryResponse().setCategoryList(categoryList);
