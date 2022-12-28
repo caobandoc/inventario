@@ -5,6 +5,6 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 @EnableReactiveMongoRepositories
-public interface ICategoryDao extends ReactiveMongoRepository<Category, Long> {
+public interface ICategoryDao extends ReactiveMongoRepository<Category, String> {
 
 }

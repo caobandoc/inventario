@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 @Slf4j
 public class CategoryServiceImpl implements ICategoryService {
@@ -23,18 +26,63 @@ public class CategoryServiceImpl implements ICategoryService {
         return categoryDao.findAll()
                 .collectList()
                 .flatMap(categoryList -> {
-                    CategoryResponseRest response = new CategoryResponseRest();
-
-                    response.getCategoryResponse().setCategoryList(categoryList);
-                    response.setMetadata("success", "00", "Respuesta exitosa");
-
+                    CategoryResponseRest response = responseSuccess(categoryList, "Respuesta exitosa");
                     return Mono.just(ResponseEntity.ok(response));
                 })
+
                 .onErrorResume(error -> {
-                    CategoryResponseRest response = new CategoryResponseRest();
-                    response.setMetadata("error", "-1", "Error al obtener las categorias");
+                    CategoryResponseRest response = responseError("Error al obtener las categorias");
                     log.error(error.getMessage());
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
                 });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<ResponseEntity<CategoryResponseRest>> searchById(String id) {
+        return categoryDao.findById(id)
+                .flatMap(category -> {
+                    CategoryResponseRest response = responseSuccess(Arrays.asList(category), "Categoria encontrada");
+                    return Mono.just(ResponseEntity.ok(response));
+                })
+
+                .switchIfEmpty(
+                        Mono.just(new ResponseEntity<>(responseError("Categoria no encontrada"), HttpStatus.NOT_FOUND))
+                )
+
+                .onErrorResume(error -> {
+                    CategoryResponseRest response = responseError("Error al obtener la categoria");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
+    @Override
+    @Transactional
+    public Mono<ResponseEntity<CategoryResponseRest>> save(Category category) {
+        return categoryDao.save(category)
+                .flatMap(categorySaved -> {
+                    CategoryResponseRest response = responseSuccess(Arrays.asList(categorySaved), "Categoria guardada");
+                    return Mono.just(ResponseEntity.ok(response));
+                })
+
+                .onErrorResume(error -> {
+                    CategoryResponseRest response = responseError("Error al guardar la categoria");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
+    private CategoryResponseRest responseSuccess(List<Category> categoryList, String msg) {
+        CategoryResponseRest response = new CategoryResponseRest();
+        response.getCategoryResponse().setCategoryList(categoryList);
+        response.setMetadata("success", "00", msg);
+        return response;
+    }
+
+    private CategoryResponseRest responseError(String msg) {
+        CategoryResponseRest response = new CategoryResponseRest();
+        response.setMetadata("error", "-1", msg);
+        return response;
     }
 }
