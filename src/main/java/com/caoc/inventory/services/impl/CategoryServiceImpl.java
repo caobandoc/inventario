@@ -99,6 +99,24 @@ public class CategoryServiceImpl implements ICategoryService {
                 });
     }
 
+    @Override
+    @Transactional
+    public Mono<ResponseEntity<CategoryResponseRest>> delete(String id) {
+        return categoryDao.findById(id)
+                .flatMap(categoryFound -> categoryDao.delete(categoryFound)
+                        .then(Mono.just(new ResponseEntity<>(responseSuccess(Arrays.asList(categoryFound), "Categoria eliminada"), HttpStatus.OK))))
+
+                .switchIfEmpty(
+                        Mono.just(new ResponseEntity<>(responseError("Categoria no encontrada"), HttpStatus.NOT_FOUND))
+                )
+
+                .onErrorResume(error -> {
+                    CategoryResponseRest response = responseError("Error al eliminar la categoria");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
     private CategoryResponseRest responseSuccess(List<Category> categoryList, String msg) {
         CategoryResponseRest response = new CategoryResponseRest();
         response.getCategoryResponse().setCategoryList(categoryList);

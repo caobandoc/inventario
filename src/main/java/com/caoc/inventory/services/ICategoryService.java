@@ -11,5 +11,6 @@ public interface ICategoryService {
     Mono<ResponseEntity<CategoryResponseRest>> searchById(String id);
     Mono<ResponseEntity<CategoryResponseRest>> save(Category category);
     Mono<ResponseEntity<CategoryResponseRest>> update(Category category, String id);
+    Mono<ResponseEntity<CategoryResponseRest>> delete(String id);
 
 }
