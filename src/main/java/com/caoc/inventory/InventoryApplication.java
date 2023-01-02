@@ -1,4 +1,4 @@
-package com.caoc.inventory.inventory;
+package com.caoc.inventory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
