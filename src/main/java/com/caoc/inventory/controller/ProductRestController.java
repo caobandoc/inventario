@@ -45,4 +45,9 @@ public class ProductRestController {
     public Mono<ResponseEntity<ProductResponseRest>> searchById(@PathVariable String id){
         return productService.searchById(id);
     }
+
+    @GetMapping("/filter/{name}")
+    public Mono<ResponseEntity<ProductResponseRest>> searchByName(@PathVariable String name){
+        return productService.searchByName(name);
+    }
 }

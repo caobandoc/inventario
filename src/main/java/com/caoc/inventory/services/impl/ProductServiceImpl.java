@@ -68,6 +68,28 @@ public class ProductServiceImpl implements IProductService {
                 });
     }
 
+    @Override
+    public Mono<ResponseEntity<ProductResponseRest>> searchByName(String name) {
+        return productDao.findByNameContainingIgnoreCase(name)
+                .map(product -> {
+                    product.setImage(Util.decompressZLib(product.getImage()));
+                    return product;
+                })
+                .collectList()
+                .flatMap(products -> {
+                    ProductResponseRest response = responseSuccess(products, "Productos encontrados");
+                    return Mono.just(ResponseEntity.status(HttpStatus.OK).body(response));
+                })
+                .switchIfEmpty(
+                        Mono.just(new ResponseEntity<>(responseError("Productos no encontrados"), HttpStatus.NOT_FOUND))
+                )
+                .onErrorResume(error -> {
+                    ProductResponseRest response = responseError("Error al buscar los productos");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
     private ProductResponseRest responseSuccess(List<Producto> productoList, String msg) {
         ProductResponseRest response = new ProductResponseRest();
         response.getProductResponse().setProducts(productoList);
