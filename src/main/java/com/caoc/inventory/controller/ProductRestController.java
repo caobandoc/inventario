@@ -39,6 +39,10 @@ public class ProductRestController {
                         throw new RuntimeException(e);
                     }
                 });
+    }
 
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<ProductResponseRest>> searchById(@PathVariable String id){
+        return productService.searchById(id);
     }
 }

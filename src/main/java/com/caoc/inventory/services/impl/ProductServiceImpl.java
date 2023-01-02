@@ -5,6 +5,7 @@ import com.caoc.inventory.model.dao.IProductDao;
 import com.caoc.inventory.model.documents.Producto;
 import com.caoc.inventory.model.response.ProductResponseRest;
 import com.caoc.inventory.services.IProductService;
+import com.caoc.inventory.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,25 @@ public class ProductServiceImpl implements IProductService {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
                 });
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Mono<ResponseEntity<ProductResponseRest>> searchById(String id) {
+        return productDao.findById(id)
+                .flatMap(product -> {
+                    product.setImage(Util.decompressZLib(product.getImage()));
+                    ProductResponseRest response = responseSuccess(Arrays.asList(product), "Producto encontrado");
+                    return Mono.just(ResponseEntity.status(HttpStatus.OK).body(response));
+                })
+                .switchIfEmpty(
+                        Mono.just(new ResponseEntity<>(responseError("Producto no encontrado"), HttpStatus.NOT_FOUND))
+                )
+                .onErrorResume(error -> {
+                    ProductResponseRest response = responseError("Error al buscar el producto");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
     }
 
     private ProductResponseRest responseSuccess(List<Producto> productoList, String msg) {

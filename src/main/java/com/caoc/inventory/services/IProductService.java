@@ -6,5 +6,6 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface IProductService {
-    public Mono<ResponseEntity<ProductResponseRest>> save(Producto producto, String idCategory);
+    Mono<ResponseEntity<ProductResponseRest>> save(Producto producto, String idCategory);
+    Mono<ResponseEntity<ProductResponseRest>> searchById(String id);
 }
