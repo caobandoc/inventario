@@ -50,4 +50,9 @@ public class ProductRestController {
     public Mono<ResponseEntity<ProductResponseRest>> searchByName(@PathVariable String name){
         return productService.searchByName(name);
     }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<ProductResponseRest>> deleteById(@PathVariable String id){
+        return productService.deleteById(id);
+    }
 }

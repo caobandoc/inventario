@@ -9,4 +9,5 @@ public interface IProductService {
     Mono<ResponseEntity<ProductResponseRest>> save(Producto producto, String idCategory);
     Mono<ResponseEntity<ProductResponseRest>> searchById(String id);
     Mono<ResponseEntity<ProductResponseRest>> searchByName(String name);
+    Mono<ResponseEntity<ProductResponseRest>> deleteById(String id);
 }
