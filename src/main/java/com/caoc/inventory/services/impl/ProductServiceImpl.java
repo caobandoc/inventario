@@ -26,6 +26,26 @@ public class ProductServiceImpl implements IProductService {
     private ICategoryDao categoryDao;
 
     @Override
+    @Transactional(readOnly = true)
+    public Mono<ResponseEntity<ProductResponseRest>> search() {
+        return productDao.findAll()
+                .map(product -> {
+                    product.setImage(Util.decompressZLib(product.getImage()));
+                    return product;
+                })
+                .collectList()
+                .flatMap(products -> {
+                    ProductResponseRest response = responseSuccess(products, "Productos encontrados");
+                    return Mono.just(ResponseEntity.status(HttpStatus.OK).body(response));
+                })
+                .onErrorResume(error -> {
+                    ProductResponseRest response = responseError("Error al buscar los productos");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
+    }
+
+    @Override
     @Transactional
     public Mono<ResponseEntity<ProductResponseRest>> save(Producto producto, String idCategory) {
         return categoryDao.findById(idCategory)
@@ -69,6 +89,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Transactional
     public Mono<ResponseEntity<ProductResponseRest>> searchByName(String name) {
         return productDao.findByNameContainingIgnoreCase(name)
                 .map(product -> {

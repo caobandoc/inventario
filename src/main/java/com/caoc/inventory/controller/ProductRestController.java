@@ -19,6 +19,11 @@ public class ProductRestController {
     @Autowired
     private IProductService productService;
 
+    @GetMapping
+    public Mono<ResponseEntity<ProductResponseRest>> search() {
+        return productService.search();
+    }
+
     @PostMapping
     public Mono<ResponseEntity<ProductResponseRest>> save(
             @RequestParam MultipartFile picture,
