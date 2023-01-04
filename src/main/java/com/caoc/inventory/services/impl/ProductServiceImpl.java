@@ -2,7 +2,6 @@ package com.caoc.inventory.services.impl;
 
 import com.caoc.inventory.model.dao.ICategoryDao;
 import com.caoc.inventory.model.dao.IProductDao;
-import com.caoc.inventory.model.documents.Category;
 import com.caoc.inventory.model.documents.Producto;
 import com.caoc.inventory.model.response.ProductResponseRest;
 import com.caoc.inventory.services.IProductService;
@@ -31,7 +30,7 @@ public class ProductServiceImpl implements IProductService {
     public Mono<ResponseEntity<ProductResponseRest>> search() {
         return productDao.findAll()
                 .map(product -> {
-                    product.setImage(Util.decompressZLib(product.getImage()));
+                    product.setPicture(Util.decompressZLib(product.getPicture()));
                     return product;
                 })
                 .collectList()
@@ -52,7 +51,7 @@ public class ProductServiceImpl implements IProductService {
         return categoryDao.findById(idCategory)
                 .map(category -> {
                     producto.setCategory(category);
-                    producto.setImage(Util.compressZLib(producto.getImage()));
+                    producto.setPicture(Util.compressZLib(producto.getPicture()));
                     return producto;
                 })
                 .flatMap(productDao::save)
@@ -81,7 +80,7 @@ public class ProductServiceImpl implements IProductService {
                                 product.setName(producto.getName());
                                 product.setPrice(producto.getPrice());
                                 product.setAccount(producto.getAccount());
-                                product.setImage(Util.compressZLib(producto.getImage()));
+                                product.setPicture(Util.compressZLib(producto.getPicture()));
                                 product.setCategory(category);
                                 return product;
                             })
@@ -110,7 +109,7 @@ public class ProductServiceImpl implements IProductService {
     public Mono<ResponseEntity<ProductResponseRest>> searchById(String id) {
         return productDao.findById(id)
                 .flatMap(product -> {
-                    product.setImage(Util.decompressZLib(product.getImage()));
+                    product.setPicture(Util.decompressZLib(product.getPicture()));
                     ProductResponseRest response = responseSuccess(Arrays.asList(product), "Producto encontrado");
                     return Mono.just(ResponseEntity.status(HttpStatus.OK).body(response));
                 })
@@ -129,7 +128,7 @@ public class ProductServiceImpl implements IProductService {
     public Mono<ResponseEntity<ProductResponseRest>> searchByName(String name) {
         return productDao.findByNameContainingIgnoreCase(name)
                 .map(product -> {
-                    product.setImage(Util.decompressZLib(product.getImage()));
+                    product.setPicture(Util.decompressZLib(product.getPicture()));
                     return product;
                 })
                 .collectList()

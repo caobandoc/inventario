@@ -20,5 +20,5 @@ public class Producto implements Serializable {
     private int account;
     @DBRef(lazy = true)
     private Category category;
-    private byte[] image;
+    private byte[] picture;
 }

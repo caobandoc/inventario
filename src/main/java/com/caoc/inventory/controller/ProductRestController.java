@@ -37,7 +37,7 @@ public class ProductRestController {
                         product.setName(name);
                         product.setPrice(price);
                         product.setAccount(account);
-                        product.setImage(Util.compressZLib(picture.getBytes()));
+                        product.setPicture(picture.getBytes());
                         return productService.save(product, categoryId);
                     }catch (IOException e){
                         throw new RuntimeException(e);
@@ -59,7 +59,7 @@ public class ProductRestController {
                         product.setName(name);
                         product.setPrice(price);
                         product.setAccount(account);
-                        product.setImage(Util.compressZLib(picture.getBytes()));
+                        product.setPicture(Util.compressZLib(picture.getBytes()));
                         return productService.update(product, productId, categoryId);
                     }catch (IOException e){
                         throw new RuntimeException(e);
