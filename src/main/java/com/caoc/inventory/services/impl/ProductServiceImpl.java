@@ -2,6 +2,7 @@ package com.caoc.inventory.services.impl;
 
 import com.caoc.inventory.model.dao.ICategoryDao;
 import com.caoc.inventory.model.dao.IProductDao;
+import com.caoc.inventory.model.documents.Category;
 import com.caoc.inventory.model.documents.Producto;
 import com.caoc.inventory.model.response.ProductResponseRest;
 import com.caoc.inventory.services.IProductService;
@@ -51,6 +52,7 @@ public class ProductServiceImpl implements IProductService {
         return categoryDao.findById(idCategory)
                 .map(category -> {
                     producto.setCategory(category);
+                    producto.setImage(Util.compressZLib(producto.getImage()));
                     return producto;
                 })
                 .flatMap(productDao::save)
@@ -67,6 +69,40 @@ public class ProductServiceImpl implements IProductService {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
                 });
 
+    }
+
+    @Override
+    @Transactional
+    public Mono<ResponseEntity<ProductResponseRest>> update(Producto producto, String idProduct, String idCategory) {
+        return categoryDao.findById(idCategory)
+                .flatMap(category -> {
+                    return productDao.findById(idProduct)
+                            .map(product -> {
+                                product.setName(producto.getName());
+                                product.setPrice(producto.getPrice());
+                                product.setAccount(producto.getAccount());
+                                product.setImage(Util.compressZLib(producto.getImage()));
+                                product.setCategory(category);
+                                return product;
+                            })
+                            .flatMap(productDao::save)
+                            .flatMap(product -> {
+                                ProductResponseRest response = responseSuccess(Arrays.asList(product), "Producto actualizado");
+                                return Mono.just(ResponseEntity.status(HttpStatus.OK).body(response));
+                            })
+                            .switchIfEmpty(Mono.just(new ResponseEntity<>(responseError("Producto no encontrado"), HttpStatus.NOT_FOUND)))
+                            .onErrorResume(error -> {
+                                ProductResponseRest response = responseError("Error al actualizar el producto");
+                                log.error(error.getMessage());
+                                return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                            });
+                })
+                .switchIfEmpty(Mono.just(new ResponseEntity<>(responseError("Categoría no encontrada"), HttpStatus.NOT_FOUND)))
+                .onErrorResume(error -> {
+                    ProductResponseRest response = responseError("Error al obtener la categoría");
+                    log.error(error.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response));
+                });
     }
 
     @Override

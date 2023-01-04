@@ -31,7 +31,6 @@ public class ProductRestController {
             @RequestParam double price,
             @RequestParam int account,
             @RequestParam String categoryId) {
-        //crear un producto
         return Mono.just(new Producto())
                 .flatMap(product -> {
                     try {
@@ -40,6 +39,28 @@ public class ProductRestController {
                         product.setAccount(account);
                         product.setImage(Util.compressZLib(picture.getBytes()));
                         return productService.save(product, categoryId);
+                    }catch (IOException e){
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<ProductResponseRest>> update(
+            @PathVariable("id") String productId,
+            @RequestParam MultipartFile picture,
+            @RequestParam String name,
+            @RequestParam double price,
+            @RequestParam int account,
+            @RequestParam String categoryId) {
+        return Mono.just(new Producto())
+                .flatMap(product -> {
+                    try {
+                        product.setName(name);
+                        product.setPrice(price);
+                        product.setAccount(account);
+                        product.setImage(Util.compressZLib(picture.getBytes()));
+                        return productService.update(product, productId, categoryId);
                     }catch (IOException e){
                         throw new RuntimeException(e);
                     }
