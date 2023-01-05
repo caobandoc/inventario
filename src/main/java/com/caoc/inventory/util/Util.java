@@ -1,11 +1,14 @@
 package com.caoc.inventory.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+@Slf4j
 public class Util {
     // compress the image bytes before storing it in the database
     public static byte[] compressZLib(byte[] data) {
@@ -23,7 +26,7 @@ public class Util {
             outputStream.close();
         } catch (IOException e) {
         }
-        System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
+        log.info("Compressed Image Byte Size - " + outputStream.toByteArray().length);
 
         return outputStream.toByteArray();
     }
