@@ -3,7 +3,8 @@ package com.caoc.inventory.controller;
 import com.caoc.inventory.model.documents.Producto;
 import com.caoc.inventory.model.response.ProductResponseRest;
 import com.caoc.inventory.services.IProductService;
-import com.caoc.inventory.util.Util;
+import com.caoc.inventory.util.ProductExcelExporter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,5 +81,19 @@ public class ProductRestController {
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<ProductResponseRest>> deleteById(@PathVariable String id){
         return productService.deleteById(id);
+    }
+
+    @GetMapping("/export/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=result_categories.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        Mono<ResponseEntity<ProductResponseRest>> search = productService.search();
+
+        ProductExcelExporter excelExporter = new ProductExcelExporter(search.block().getBody().getProductResponse().getProducts());
+
+        excelExporter.export(response);
     }
 }
